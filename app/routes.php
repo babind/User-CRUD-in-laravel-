@@ -16,3 +16,5 @@ Route::get('/', function()
 });
 
 Route::resource('users','UsersController');
+Route::get('register',array('as'=>'Sessions.register','uses'=>'SessionsController@create'));
+Route::controller('password','RemindersController');

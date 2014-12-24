@@ -15,6 +15,7 @@
 		<ul class="nav navbar-nav">
 			<li><a href="{{URL::to('users')}}">View All Users</a></li>
 			<li><a href="{{URL::to('users/create')	}}">Create A User</a></li>
+			<li><a href="{{URL::to('register')}}">Register</a></li>
 		</ul>
 		</nav>
 
