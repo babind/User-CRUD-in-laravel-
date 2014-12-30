@@ -1,44 +1,32 @@
 @extends('layout.default')
+    @section('content')
+        {{ Form::open(array('route' => 'users.store', 'class' => 'form-horizontal'))}}
 
-@section('content')
-<head>
-		<title>Look! I'm creating User</title>
-		<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
-	</head>
-	<body>
-	<div class="container">
+        <div class="form-group">
+            {{Form::label('name', 'Name', array('class' => 'awesome'));}}
+            {{Form::text('name','',array('class' => 'form-control'))}}
+            {{$errors->first('name')}}
+        </div>
 
-	<nav class="navbar navbar-inverse">
-		<div class="navbar-header">
-			<a class="navbar-brand" href="{{URL::to('users')	}}"> User Alert</a>
-		</div>
-		<ul class="nav navbar-nav">
-			<li><a href="{{URL::to('users')}}">View All Users</a></li>
-			<li><a href="{{URL::to('users/create')	}}">Create A User</a></li>
-			<li><a href="{{URL::to('register')}}">Register</a></li>
-		</ul>
-		</nav>
+        <div class="form-group">
+            {{Form::label('email', 'Email', array('class' => 'awesome'));}}
+            {{Form::email('email','',array('class' => 'form-control'))}}
+            {{$errors->first('email')}}
+        </div>
+        <div class="form-group">
+            {{Form::label('password', 'Password', array('class' => 'awesome'));}}
+            {{Form::password('password',array('class' => 'form-control'))}}
+            {{$errors->first('password')}}
+        </div>
+        <div class="form-group">
+            {{Form::label('password', 'Retype Password', array('class' => 'awesome'));}}
+            {{Form::password('password_confirmation',array('class' => 'form-control'))}}
+            {{$errors->first('password_confirmation')}}
+        </div>
+        <div class="form-group">
+            {{Form::submit('Create Account',array('class' => 'btn btn-success btn-block'))}}
+        </div>
+        {{ Form::close() }}
+         <h4>{{HTML::linkRoute('sessions.login','I already have an Account')}}</h4>
 
-
-	<!-- if there are creation errors ,they will show here -->
-	{{HTML::ul($errors->all()	)}}
-
-	{{Form::open(array('url'=>'users'))	}}
-
-		<div class="form-group">
-			{{Form::label('name','Name:')	}}
-			{{Form::text('name',Input::old('name'),array('class'=>'form-control'))	}}
-		</div>
-
-		<div class="form-group">
-			{{Form::label('email','Email:')}}
-			{{Form::email('email',Input::old('email'),array('class'=>'form-control'))	}}
-		</div>
-
-		{{Form::submit('Create the User!',array('class'=>'btn btn-primary'))	}}
-		{{Form::close()	}}
-		</div>
-	</body>
-</html>
-
-
+    @stop

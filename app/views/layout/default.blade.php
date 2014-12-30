@@ -1,4 +1,13 @@
-@include('layout.header')
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+	<title>crud</title>
+	{{HTML::style("css/bootstrap.css")	}}
+	{{HTML::script("js/jquery.js")	}}
+		{{HTML::script("js/bootstrap.js")	}}
+</head>
+<body>
     @yield('head')
 <nav class="navbar navbar-inverse" role="navigation">
 </nav>
@@ -8,4 +17,5 @@
 	    @endif
     @yield('content')
 </div>
-@include('layout.footer')
+</body>
+</html>

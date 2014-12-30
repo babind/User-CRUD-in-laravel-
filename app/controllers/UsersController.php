@@ -1,153 +1,129 @@
 <?php
-
 class UsersController extends \BaseController {
-
-	/**
-	 * Display a listing of the resource.
-	 * GET /users
-	 *
-	 * @return Response
-	 */
+	function __construct(User $user) {
+		$this->user = $user;
+	}
 	public function index()
 	{
-		/* get all the users*/
-		$users=User::all();
-
-		// load the view and pass the users
-
-		return View::make('users.index')->with('users',$users);
 	}
-	/**
-	 * Show the form for creating a new resource.
-	 * GET /users/create
-	 *
-	 * @return Response
-	 */
 	public function create()
 	{
-		// load the create form (app/views/users/create.blade.php)
-		return View::make('users.create');
+			if (Auth::check()) return Redirect::route('users.show',['id' => Auth::user()->id]);
+			return View::make('users.create');
 	}
-
-	/**
-	 * Store a newly created resource in storage.
-	 * POST /users
-	 *
-	 * @return Response
-	 */
 	public function store()
 	{
-		//validate 
-
-		$rules=array(
-			'name'=>'required',
-			'email'=>'required|email',
-			);
-		$validator=Validator::make(Input::all(),$rules);
-	// process the login
-	
-	if($validator->fails()){
-		return Redirect::to('users/create')->withErrors($validator)->withInput(Input::except('password'));
-
-		}else{
-			//store 
-			$user=new User;
-			$user->name= Input::get('name');
-			$user->email=Input::get('email');
+		$rules = array(
+			'name'  	 => 'required',
+			'email'  	 => 'required|email|unique:users',	
+			'password' => 'required|min:6|confirmed',
+			'password_confirmation'=> 'required|min:6'
+		);
+		$validator = Validator::make(Input::all(), $rules);
+		if($validator->passes()){	
+			$user = new User;
+			$user->name = Input::get('name');
+		  $user->email = Input::get('email');
+			$user->password = Hash::make(Input::get('password'));
 			$user->save();
-
-			//redirect 
-
-			Session::flash('message','Successsfully created  user!');
-			return Redirect::to('users');
-		}	
+			return Redirect::route('sessions.login')->with('message', 'Thanks for registering!');
+		}
+		else{
+			return Redirect::back()->withInput()->withErrors($validator);
+		}
 	}
-
-	/**
-	 * Display the specified resource.
-	 * GET /users/{id}
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
 	public function show($id)
 	{
-		//get the user
-		 $user=User::find($id);
-
-		 //show the view and pass the user to it
-		 return View::make('users.show')->with('user',$user);
-
+		if (Auth::guest()) return Redirect::route('sessions.login');
+		$user = $this->user->find($id);
+		return View::make('users.dashboard',['user' => $user]);		
 	}
-
-	/**
-	 * Show the form for editing the specified resource.
-	 * GET /users/{id}/edit
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
 	public function edit($id)
 	{
-		// get the nerd
-		$user=User::find($id);
-
-		// show edit form and pass the user
-
-		return View::make('users.edit')->with('user',$user);
+		if (Auth::user()->id != $id) {
+       	return Redirect::route('users.edit',['id' => Auth::user()->id]);
+    } else {
+       	$user = $this->user->find($id);
+				return View::make('users.edit',['user'=>$user]);
+    }
 	}
-
-	/**
-	 * Update the specified resource in storage.
-	 * PUT /users/{id}
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
 	public function update($id)
 	{
-		//validate
-
-		$rules=array(
-			'name'=>'required',
-			'email'=>'required|email'
-	);
-	$validator=Validator::make(Input::all(),$rules);
-	// process the login
-	if($validator->fails()){
-		return Redirect::to('users/'.$id.'/edit')
-		->withErrors($validator)
-		->withInput(Input::except('password'));
-	}else{
-		//store
-		$user=User::find($id);
-		$user->name=Input::get('name');
-		$user->email=Input::get('email');
-		$user->save();
-
-		//redirect 
-		Session::flash('message','Successfully updated user!' );
-		return Redirect::to('users');
-
-		}	
-	
+		$rules = array(
+			'name'  	 => 'required',
+		);
+		$validator = Validator::make(Input::all(), $rules);
+		if($validator->passes()){	
+			$user = $this->user->find($id);
+			$user->name = Input::get('name');
+			$user->street_address = Input::get('street_address');
+			$user->state = Input::get('state');
+			$user->city = Input::get('city');
+			$user->zip_code = Input::get('zip_code');
+			$user->country = Input::get('country');
+			$user->mobile_phone = Input::get('mobile_phone');
+			$user->save();
+			return Redirect::route('users.show', ['id' => $id])
+																->with('message', 'Successfully Updated');
+		}
+		else{
+			return Redirect::back()->withInput()
+														 ->withErrors($validator);
+		}
 	}
-
-	/**
-	 * Remove the specified resource from storage.
-	 * DELETE /users/{id}
-	 *
-	 * @param  int  $id
-	 * @return Response
-	 */
 	public function destroy($id)
 	{
-		//delete
-		$user=User::find($id);
-		$user->delete();
-		//
-		Session::flash('message','User deleted');
-		return Redirect::to('users');
+			$user = $this->user->find($id);
+			$user->delete();
+		Session::flash('message', 'Successfully closed the account!');
+		return Redirect::route('sessions.login');
 	}
-
+	public function getChangeEmail()
+	{
+		return View::make('users.changeemail');
+	}
+	public function changeEmail($id)
+	{
+		$rules = array('email' => 'required|email|unique:users');
+		$validator = Validator::make(Input::all(), $rules);
+		if ($validator->passes()) {
+			$user = $this->user->find($id);
+			$user->email = Input::get('email');
+			$user->save();
+			return Redirect::route('users.getChangeEmail')
+												->with('message' , 'Email Successfully Changed') ;
+		}
+			return Redirect::back()->withErrors($validator)->withInput();
+	}
+	public function getChangepassword()
+	{
+		return View::make('users.changepassword');
+	}
+	public function changepassword($id)
+	{
+		$rules = array(
+			'old-password'  => 'required|min:6',
+			'new_password'  => 'required|min:6|confirmed',
+			'password_confirmation' => 'required|min:6'
+		);
+		$user = $this->user->find($id);
+		$oldPassword = Auth::user()->password;
+		$oldPassword1 =Input::get('old-password');
+		$newPassword = Input::get('password');
+		$validator = Validator::make(Input::all(), $rules);
+    if($validator->fails()){	
+    	if (! Hash::check($oldPassword1, $oldPassword)){
+				return Redirect::route('users.getChangepassword')
+														->with('message','Old Password did not match');
+			}else	{
+			 	$user->password =  Hash::make($newPassword);
+				$user->save();
+			return Redirect::route('users.getChangepassword')
+														->with('message','Password Successfully Changed');
+			}	
+		}
+		else{
+				return Redirect::back()->withErrors($validator);
+		}
+	}
 }

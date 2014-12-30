@@ -11,16 +11,6 @@ class SessionsController extends \BaseController {
 	public function index()
 	{
 		// 
-		$rules=array('name'=>'required',
-					'email'=>'required|email'
-				);
-
-		$validator=Validator::make(Input::all(),$rules);
-		if ($validator->fails()){
-			return View::make('Sessions.index')->with($validator);
-		}else{
-			return Redirect::to('Sessions.store');
-		}
 		
 	}
 
@@ -32,7 +22,9 @@ class SessionsController extends \BaseController {
 	 */
 	public function create()
 	{
-		//
+		
+		if(Auth::check()) return Redirect::route('users.show',['id'=>user()->id]);
+		return View::make('sessions.create');
 	}
 
 	/**
@@ -44,7 +36,24 @@ class SessionsController extends \BaseController {
 	public function store()
 	{
 		//
-		 return View::make('Sessions.show');
+		$rules=array(
+			'email'=>'required|email',
+			'password'=>'required'
+		);
+		$validator=Validator::make(Input::all(),$rules);
+		if($validator->passes()){
+			if(Auth::attempt(Input::only('email','password'))){
+				$user=Auth::user();
+				return Redirect::route('users.show',['id'=>$user->id]);
+
+			}
+			return Redirect::back()->withInput()->withMessage('Invalid username or Password');
+			
+			}
+			else{
+				return Redirect::back()->withInput()->withErrors($validator);	
+			}
+		
 	}
 
 	/**
@@ -93,6 +102,11 @@ class SessionsController extends \BaseController {
 	public function destroy($id)
 	{
 		//
+	}
+	public function logout()
+	{
+		Auth::logout();
+		return Redirect::route('sessions.login')->with('message','You are now logged out');
 	}
 
 }
