@@ -1,0 +1,1 @@
+/var/www/html/ideasoffshore-projects/laraseries/app/views/courses/edit.blade.php

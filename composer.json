@@ -5,8 +5,10 @@
 	"license": "MIT",
 	"type": "project",
 	"require": {
-		"laravel/framework": "4.2.12"
-	
+		"laravel/framework": "4.2.12",
+		"stripe/stripe-php":"1.8.3",
+		"laravel/cashier": "~2.0"
+
 		},
 	"require-dev": {
 		"way/generators": "2.6.1",
